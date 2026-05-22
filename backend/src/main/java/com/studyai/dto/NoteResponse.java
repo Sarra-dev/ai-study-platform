@@ -1,9 +1,11 @@
 package com.studyai.dto;
+
 import lombok.*;
 import java.time.LocalDateTime;
+
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class NoteResponse {
-    private Long id;
+    private String id;
     private String title;
     private String content;
     private String aiSummary;

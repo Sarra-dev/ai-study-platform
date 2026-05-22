@@ -28,7 +28,7 @@ public class TaskService {
                 .priority(request.getPriority() != null ? request.getPriority() : Task.Priority.MEDIUM)
                 .dueDate(request.getDueDate())
                 .subject(request.getSubject())
-                .user(user)
+                .userId(user.getId())
                 .build();
         return toResponse(taskRepository.save(task));
     }
@@ -39,7 +39,7 @@ public class TaskService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public TaskResponse updateTask(Long id, TaskRequest request, String email) {
+    public TaskResponse updateTask(String id, TaskRequest request, String email) {
         User user = getUser(email);
         Task task = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -53,7 +53,7 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
-    public TaskResponse updateStatus(Long id, Task.Status status, String email) {
+    public TaskResponse updateStatus(String id, Task.Status status, String email) {
         User user = getUser(email);
         Task task = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -61,16 +61,18 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
-    public void deleteTask(Long id, String email) {
+    public void deleteTask(String id, String email) {
         User user = getUser(email);
         Task task = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Task not found"));
         taskRepository.delete(task);
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     private User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
     private TaskResponse toResponse(Task task) {

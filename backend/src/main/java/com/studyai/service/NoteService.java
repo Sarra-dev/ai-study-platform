@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class NoteService {
                 .content(request.getContent())
                 .subject(request.getSubject())
                 .tags(request.getTags())
-                .user(user)
+                .userId(user.getId())
                 .build();
         return toResponse(noteRepository.save(note));
     }
@@ -39,14 +40,14 @@ public class NoteService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public NoteResponse getNoteById(Long id, String email) {
+    public NoteResponse getNoteById(String id, String email) {
         User user = getUser(email);
         Note note = noteRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Note not found"));
         return toResponse(note);
     }
 
-    public NoteResponse updateNote(Long id, NoteRequest request, String email) {
+    public NoteResponse updateNote(String id, NoteRequest request, String email) {
         User user = getUser(email);
         Note note = noteRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Note not found"));
@@ -55,29 +56,38 @@ public class NoteService {
         note.setContent(request.getContent());
         note.setSubject(request.getSubject());
         note.setTags(request.getTags());
+        note.setUpdatedAt(LocalDateTime.now());
         return toResponse(noteRepository.save(note));
     }
 
-    public void deleteNote(Long id, String email) {
+    public void deleteNote(String id, String email) {
         User user = getUser(email);
         Note note = noteRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Note not found"));
         noteRepository.delete(note);
     }
 
-    public NoteResponse summarizeNote(Long id, String email) {
+    /**
+     * Summarise the note content via AI and persist the result.
+     * This is the main fix: we call aiService.summarizeText(), store it on the
+     * document, then save — so the summary actually reaches the database.
+     */
+    public NoteResponse summarizeNote(String id, String email) {
         User user = getUser(email);
         Note note = noteRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Note not found"));
 
         String summary = aiService.summarizeText(note.getContent());
         note.setAiSummary(summary);
+        note.setUpdatedAt(LocalDateTime.now());
         return toResponse(noteRepository.save(note));
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     private User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
     private NoteResponse toResponse(Note note) {

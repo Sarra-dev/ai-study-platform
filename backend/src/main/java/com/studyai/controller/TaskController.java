@@ -21,7 +21,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest request,
-                                                    Authentication auth) {
+                                                   Authentication auth) {
         return ResponseEntity.ok(taskService.createTask(request, auth.getName()));
     }
 
@@ -31,21 +31,21 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id,
-                                                    @Valid @RequestBody TaskRequest request,
-                                                    Authentication auth) {
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable String id,
+                                                   @Valid @RequestBody TaskRequest request,
+                                                   Authentication auth) {
         return ResponseEntity.ok(taskService.updateTask(id, request, auth.getName()));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<TaskResponse> updateStatus(@PathVariable Long id,
-                                                      @RequestParam Task.Status status,
-                                                      Authentication auth) {
+    public ResponseEntity<TaskResponse> updateStatus(@PathVariable String id,
+                                                     @RequestParam Task.Status status,
+                                                     Authentication auth) {
         return ResponseEntity.ok(taskService.updateStatus(id, status, auth.getName()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<Void> deleteTask(@PathVariable String id, Authentication auth) {
         taskService.deleteTask(id, auth.getName());
         return ResponseEntity.noContent().build();
     }

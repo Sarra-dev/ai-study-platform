@@ -20,7 +20,7 @@ public class NoteController {
 
     @PostMapping
     public ResponseEntity<NoteResponse> createNote(@Valid @RequestBody NoteRequest request,
-                                                    Authentication auth) {
+                                                   Authentication auth) {
         return ResponseEntity.ok(noteService.createNote(request, auth.getName()));
     }
 
@@ -30,26 +30,25 @@ public class NoteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NoteResponse> getNoteById(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<NoteResponse> getNoteById(@PathVariable String id, Authentication auth) {
         return ResponseEntity.ok(noteService.getNoteById(id, auth.getName()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NoteResponse> updateNote(@PathVariable Long id,
-                                                    @Valid @RequestBody NoteRequest request,
-                                                    Authentication auth) {
+    public ResponseEntity<NoteResponse> updateNote(@PathVariable String id,
+                                                   @Valid @RequestBody NoteRequest request,
+                                                   Authentication auth) {
         return ResponseEntity.ok(noteService.updateNote(id, request, auth.getName()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNote(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<Void> deleteNote(@PathVariable String id, Authentication auth) {
         noteService.deleteNote(id, auth.getName());
         return ResponseEntity.noContent().build();
     }
 
-    // AI: Summarize note content
     @PostMapping("/{id}/summarize")
-    public ResponseEntity<NoteResponse> summarizeNote(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<NoteResponse> summarizeNote(@PathVariable String id, Authentication auth) {
         return ResponseEntity.ok(noteService.summarizeNote(id, auth.getName()));
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,14 +31,13 @@ public class QuizService {
                 .title(request.getTitle())
                 .subject(request.getSubject())
                 .description(request.getDescription())
-                .user(user)
+                .userId(user.getId())
                 .build();
 
         if (request.getQuestions() != null) {
-            List<QuizQuestion> questions = request.getQuestions().stream()
-                    .map(q -> mapToEntity(q, quiz))
-                    .collect(Collectors.toList());
-            quiz.setQuestions(questions);
+            quiz.setQuestions(request.getQuestions().stream()
+                    .map(this::dtoToEntity)
+                    .collect(Collectors.toList()));
         }
 
         return toResponse(quizRepository.save(quiz));
@@ -46,7 +46,7 @@ public class QuizService {
     public QuizResponse generateAiQuiz(GenerateQuizRequest request, String email) {
         User user = getUser(email);
 
-        List<QuizQuestionDto> generatedQs = aiService.generateMcqQuestions(
+        List<QuizQuestionDto> generated = aiService.generateMcqQuestions(
                 request.getText(),
                 request.getNumberOfQuestions(),
                 request.getSubject()
@@ -56,13 +56,9 @@ public class QuizService {
                 .title("AI Quiz: " + (request.getSubject() != null ? request.getSubject() : "Generated Quiz"))
                 .subject(request.getSubject())
                 .description("AI-generated quiz from text")
-                .user(user)
+                .userId(user.getId())
+                .questions(generated.stream().map(this::dtoToEntity).collect(Collectors.toList()))
                 .build();
-
-        List<QuizQuestion> questions = generatedQs.stream()
-                .map(q -> mapToEntity(q, quiz))
-                .collect(Collectors.toList());
-        quiz.setQuestions(questions);
 
         return toResponse(quizRepository.save(quiz));
     }
@@ -73,22 +69,25 @@ public class QuizService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public QuizResponse getQuizById(Long id, String email) {
+    public QuizResponse getQuizById(String id, String email) {
         User user = getUser(email);
         Quiz quiz = quizRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
         return toResponse(quiz);
     }
 
-    public void deleteQuiz(Long id, String email) {
+    public void deleteQuiz(String id, String email) {
         User user = getUser(email);
         Quiz quiz = quizRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
         quizRepository.delete(quiz);
     }
 
-    private QuizQuestion mapToEntity(QuizQuestionDto dto, Quiz quiz) {
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private QuizQuestion dtoToEntity(QuizQuestionDto dto) {
         return QuizQuestion.builder()
+                .id(dto.getId() != null ? dto.getId() : UUID.randomUUID().toString())
                 .questionText(dto.getQuestionText())
                 .optionA(dto.getOptionA())
                 .optionB(dto.getOptionB())
@@ -97,30 +96,28 @@ public class QuizService {
                 .correctAnswer(dto.getCorrectAnswer())
                 .explanation(dto.getExplanation())
                 .orderIndex(dto.getOrderIndex())
-                .quiz(quiz)
                 .build();
     }
 
     private User getUser(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 
     private QuizResponse toResponse(Quiz quiz) {
         List<QuizQuestionDto> questionDtos = quiz.getQuestions() == null ? List.of() :
-                quiz.getQuestions().stream().map(q -> {
-                    QuizQuestionDto dto = new QuizQuestionDto();
-                    dto.setId(q.getId());
-                    dto.setQuestionText(q.getQuestionText());
-                    dto.setOptionA(q.getOptionA());
-                    dto.setOptionB(q.getOptionB());
-                    dto.setOptionC(q.getOptionC());
-                    dto.setOptionD(q.getOptionD());
-                    dto.setCorrectAnswer(q.getCorrectAnswer());
-                    dto.setExplanation(q.getExplanation());
-                    dto.setOrderIndex(q.getOrderIndex());
-                    return dto;
-                }).collect(Collectors.toList());
+                quiz.getQuestions().stream().map(q -> QuizQuestionDto.builder()
+                        .id(q.getId())
+                        .questionText(q.getQuestionText())
+                        .optionA(q.getOptionA())
+                        .optionB(q.getOptionB())
+                        .optionC(q.getOptionC())
+                        .optionD(q.getOptionD())
+                        .correctAnswer(q.getCorrectAnswer())
+                        .explanation(q.getExplanation())
+                        .orderIndex(q.getOrderIndex())
+                        .build()
+                ).collect(Collectors.toList());
 
         return QuizResponse.builder()
                 .id(quiz.getId())

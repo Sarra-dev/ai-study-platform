@@ -1,12 +1,14 @@
 package com.studyai.model;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "quizzes")
+@Document(collection = "quizzes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,25 +16,18 @@ import java.util.List;
 public class Quiz {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
     private String title;
-
     private String subject;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    /** Questions are embedded (no separate collection needed in MongoDB). */
     private List<QuizQuestion> questions;
 
-    @Column(updatable = false)
+    @Indexed
+    private String userId;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }
