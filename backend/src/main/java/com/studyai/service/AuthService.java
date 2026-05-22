@@ -1,6 +1,8 @@
 package com.studyai.service;
 
-import com.studyai.dto.*;
+import com.studyai.dto.AuthResponse;
+import com.studyai.dto.LoginRequest;
+import com.studyai.dto.RegisterRequest;
 import com.studyai.model.User;
 import com.studyai.repository.UserRepository;
 import com.studyai.security.JwtUtil;
@@ -46,7 +48,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().name())
-                .userId(user.getId())
+                .userId(user.getId())   // String now, matches updated AuthResponse
                 .build();
     }
 
@@ -66,7 +68,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().name())
-                .userId(user.getId())
+                .userId(user.getId())   // String now, matches updated AuthResponse
                 .build();
     }
 }

@@ -12,7 +12,9 @@ import java.util.List;
 // Auth
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class RegisterRequest {
-    @NotBlank @Size(min = 3, max = 50) public String username;
-    @NotBlank @Email public String email;
-    @NotBlank @Size(min = 6) public String password;
+    @NotBlank @Size(min = 3, max = 50) private String username;
+    @NotBlank @Email private String email;
+
+
+    @NotBlank @Size(min = 6) private String password;
 }

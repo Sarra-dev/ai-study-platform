@@ -6,9 +6,9 @@ import java.time.LocalDate;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class TaskRequest {
     @NotBlank public String title;
-    public String description;
-    public Task.Status status;
-    public Task.Priority priority;
-    public LocalDate dueDate;
-    public String subject;
+    private String description;
+    private Task.Status status;
+    private Task.Priority priority;
+    private LocalDate dueDate;
+    private String subject;
 }

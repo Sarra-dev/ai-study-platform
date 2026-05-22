@@ -3,8 +3,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class NoteRequest {
-    @NotBlank public String title;
-    @NotBlank public String content;
-    public String subject;
-    public String tags;
+    @NotBlank private String title;
+    @NotBlank private String content;
+    private String subject;
+    private String tags;
 }

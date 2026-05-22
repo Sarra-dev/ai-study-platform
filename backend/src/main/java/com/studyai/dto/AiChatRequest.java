@@ -3,6 +3,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class AiChatRequest {
-    @NotBlank public String message;
-    public String context;
+    @NotBlank private String message;
+    private String context;
 }

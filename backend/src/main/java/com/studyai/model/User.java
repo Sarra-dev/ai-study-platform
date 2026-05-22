@@ -1,5 +1,6 @@
 package com.studyai.model;
 
+import com.mongodb.connection.ProxySettings;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -30,6 +31,7 @@ public class User {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
 
     public enum Role {
         STUDENT, TEACHER, ADMIN

@@ -3,7 +3,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class GenerateQuizRequest {
-    @NotBlank public String text;
-    public int numberOfQuestions = 5;
-    public String subject;
+    @NotBlank private String text;
+    private int numberOfQuestions = 5;
+    private String subject;
 }
